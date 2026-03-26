@@ -1356,7 +1356,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴇɴᴛ ʀɪɢʜᴛs ᴛᴏ ᴅᴏ ᴛʜɪs ❌", show_alert=True)
 
     elif query.data.startswith("hnalert"):
-        ident, from_user = query.data.split("#")  # Hindi Not Available
+        ident, from_user = query.data.split("#")
         if int(query.from_user.id) == int(from_user):
             user = await client.get_users(from_user)
             await query.answer(
@@ -1367,7 +1367,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer("Nᴏᴛ ᴀʟʟᴏᴡᴇᴅ — ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴛʜᴇ ʀᴇǫᴜᴇꜱᴛᴇʀ ❌", show_alert=True)
 
     elif query.data.startswith("nralert"):
-        ident, from_user = query.data.split("#")  # Not Released
+        ident, from_user = query.data.split("#")
         if int(query.from_user.id) == int(from_user):
             user = await client.get_users(from_user)
             await query.answer(
@@ -1378,7 +1378,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer("Yᴏᴜ ᴄᴀɴ'ᴛ ᴅᴏ ᴛʜɪꜱ ᴀꜱ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴛʜᴇ ᴏʀɪɢɪɴᴀʟ ʀᴇǫᴜᴇꜱᴛᴇʀ ❌", show_alert=True)
 
     elif query.data.startswith("wsalert"):
-        ident, from_user = query.data.split("#")  # Wrong Spelling
+        ident, from_user = query.data.split("#")
         if int(query.from_user.id) == int(from_user):
             user = await client.get_users(from_user)
             await query.answer(
@@ -1425,7 +1425,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer(f"⚠️ SOMETHING WENT WRONG STREAM LINK  \n\n{e}", show_alert=True)
             return
 
-
     elif query.data == "prestream":
         await query.answer(text=script.PRE_STREAM_ALERT, show_alert=True)
         dreamcinezone = await client.send_photo(
@@ -1448,6 +1447,28 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.message.delete()
         except:
             pass
+
+    # ==================== ADMIN REQUEST HANDLER ====================
+    elif query.data.startswith("req_"):
+        movie_name = query.data.split("_", 1)[1]
+        user = query.from_user
+        admin_id = ADMINS[0] if ADMINS else None
+        if not admin_id:
+            await query.answer("Admin ID not configured!", show_alert=True)
+            return
+        text = (
+            f"📥 **New Movie Request**\n\n"
+            f"👤 User: {user.mention}\n"
+            f"🆔 ID: `{user.id}`\n"
+            f"🎬 Movie: `{movie_name}`"
+        )
+        try:
+            await client.send_message(admin_id, text)
+            await query.answer("✅ Request sent to admin!", show_alert=True)
+        except Exception as e:
+            logger.exception(e)
+            await query.answer("❌ Failed to send request.", show_alert=True)
+
     else:
         try:
             await query.answer("🔔 ꜱᴏʀʀʏ ᴛʜᴇ ᴘᴀɢᴇ ɪꜱ ɴᴏᴛ ʀᴇꜱᴘᴏɴᴅɪɴɢ ʀɪɢʜᴛ ɴᴏᴡ !!", show_alert=True)
@@ -1811,29 +1832,3 @@ async def advantage_spell_chok(client, message):
         await message.delete()
     except:
         pass
-
-
-# ==================== ADMIN REQUEST HANDLER ====================
-@Client.on_callback_query(filters.regex(r"^req_"))
-async def admin_request_cb(client: Client, query: CallbackQuery):
-    # Extract movie name from callback data
-    movie_name = query.data.split("_", 1)[1]
-    user = query.from_user
-    # Use first admin from ADMINS list (imported from info.py)
-    admin_id = ADMINS[0] if ADMINS else None
-    if not admin_id:
-        await query.answer("Admin ID not configured!", show_alert=True)
-        return
-    # Send message to admin
-    text = (
-        f"📥 **New Movie Request**\n\n"
-        f"👤 User: {user.mention}\n"
-        f"🆔 ID: `{user.id}`\n"
-        f"🎬 Movie: `{movie_name}`"
-    )
-    try:
-        await client.send_message(admin_id, text)
-        await query.answer("✅ Request sent to admin!", show_alert=True)
-    except Exception as e:
-        logger.exception(e)
-        await query.answer("❌ Failed to send request.", show_alert=True)
