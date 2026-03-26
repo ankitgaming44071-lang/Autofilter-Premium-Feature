@@ -1,38 +1,26 @@
-# Copyright (C) 2021-2022 by Sujal720@Github, < https://github.com/Sujal720 >.
-#
-# This file is part of < https://github.com/Sujal720/AutoFilterPremium > project,
-# and is released under the "GNU v3.0 License Agreement".
-# Please see < https://github.com/Sujal720/AutoFilterPremium/blob/main/LICENSE >
-#
-# All rights reserved.
-
+from utils import get_size, is_subscribed, is_req_subscribed, group_setting_buttons, get_poster, get_posterx, temp, get_settings, save_group_settings, get_cap, imdb, is_check_admin, extract_request_content, log_error, clean_filename, generate_season_variations, clean_search_text
+import tracemalloc
+from fuzzywuzzy import process
+from dreamxbotz.util.file_properties import get_name, get_hash
+from urllib.parse import quote_plus
+import logging
+from database.ia_filterdb import Media, Media2, get_file_details, get_search_results, get_bad_files
+from database.config_db import mdb
+from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid, ChatAdminRequired, UserNotParticipant
+from pyrogram import Client, filters, enums
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, WebAppInfo
+from info import *
+from Script import script
+from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
+from database.refer import referdb
+from database.users_chats_db import db
 import asyncio
 import re
 import math
 import random
 import pytz
-import tracemalloc
 from datetime import datetime, timedelta
-from urllib.parse import quote_plus
-import logging
-
-from pyrogram import Client, filters, enums
-from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid, ChatAdminRequired, UserNotParticipant
-from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, WebAppInfo
-
-from info import *
-from Script import script
-from database.ia_filterdb import Media, Media2, get_file_details, get_search_results, get_bad_files
-from database.config_db import mdb
-from database.users_chats_db import db
-from database.refer import referdb
-from utils import (get_size, is_subscribed, is_req_subscribed, group_setting_buttons, get_poster, get_posterx, temp,
-                   get_settings, save_group_settings, get_cap, imdb, is_check_admin, extract_request_content,
-                   log_error, clean_filename, generate_season_variations, clean_search_text)
-from dreamxbotz.util.file_properties import get_name, get_hash
-
-from fuzzywuzzy import process
+lock = asyncio.Lock()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
@@ -126,201 +114,6 @@ async def pm_text(bot, message):
         pass
 
 
-async def auto_filter(client, msg, spoll=False):
-    if not spoll:
-        message = msg
-        settings = await get_settings(message.chat.id)
-        if message.text.startswith("/"): return  # ignore commands
-        if re.findall("((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F])|(\s+[@#]))", message.text):
-            return
-        if len(message.text) < 100:
-            search = message.text
-            search = re.sub(r"[^a-zA-Z0-9\s]", "", search)  # Remove special characters
-            search = search.strip()
-            if not search:
-                return
-        else:
-            return
-    else:
-        message = msg.message.reply_to_message  # msg is the callback query
-        search, files, offset, total_results = spoll
-        settings = await get_settings(message.chat.id)
-    try:
-        search = search.strip()
-    except:
-        search = search
-    if not settings:
-        await save_group_settings(message.chat.id, 'button', True)
-        settings = await get_settings(message.chat.id)
-    if 'is_shortlink' in settings.keys():
-        pass
-    else:
-        await save_group_settings(message.chat.id, 'is_shortlink', False)
-        settings = await get_settings(message.chat.id)
-    user = message.from_user.id if message.from_user else 0
-    if 'spell_check' in settings.keys():
-        pass
-    else:
-        await save_group_settings(message.chat.id, 'spell_check', True)
-        settings = await get_settings(message.chat.id)
-
-    if not spoll:
-        files, offset, total_results = await get_search_results(message.chat.id, search, offset=0, filter=True)
-        if not files:
-            if settings["spell_check"]:
-                await advantage_spell_chok(client, msg)
-            else:
-                google = search.replace(" ", "+")
-                button = [[InlineKeyboardButton(
-                    "🔍 ᴄʜᴇᴄᴋ sᴘᴇʟʟɪɴɢ ᴏɴ ɢᴏᴏɢʟᴇ 🔍", url=f"https://www.google.com/search?q={google}")]]
-                k = await message.reply_text(text=script.I_CUDNT.format(search), reply_markup=InlineKeyboardMarkup(button))
-                await asyncio.sleep(60)
-                await k.delete()
-                try:
-                    await message.delete()
-                except:
-                    pass
-            return
-
-    if spoll:
-        k = await message.reply_text(f"<b>Hᴇʏ {message.from_user.mention},\n\nI ᴀᴍ ꜰᴇᴛᴄʜɪɴɢ ʏᴏᴜʀ ʀᴇǫᴜᴇꜱᴛ...</b>")
-        await asyncio.sleep(0.5)
-        await k.delete()
-    if 'button' in settings.keys():
-        pass
-    else:
-        await save_group_settings(message.chat.id, 'button', True)
-        settings = await get_settings(message.chat.id)
-
-    temp.GETALL[search] = files
-    temp.SHORT[message.from_user.id] = message.chat.id
-    key = search
-    req = user
-    curr_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
-    if settings.get('button'):
-        btn = [
-            [
-                InlineKeyboardButton(text=f"🔗 {get_size(file.file_size)} ≽ " + clean_filename(
-                    file.file_name), callback_data=f'file#{file.file_id}'),
-            ]
-            for file in files
-        ]
-        btn.insert(0,
-                   [
-                       InlineKeyboardButton(
-                           f'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{key}"),
-                       InlineKeyboardButton(
-                           "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{key}"),
-                       InlineKeyboardButton(
-                           "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{key}")
-                   ]
-                   )
-        btn.insert(0,
-                   [
-                       InlineKeyboardButton(
-                           "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium"),
-                       InlineKeyboardButton(
-                           "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}")
-
-                   ]
-                   )
-
-    else:
-        btn = []
-        btn.insert(0,
-                   [
-                       InlineKeyboardButton(
-                           f'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{key}"),
-                       InlineKeyboardButton(
-                           "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{key}"),
-                       InlineKeyboardButton(
-                           "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{key}")
-                   ]
-                   )
-        btn.insert(0, [
-            InlineKeyboardButton(
-                "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium"),
-            InlineKeyboardButton("Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}")
-        ])
-
-    if offset != "":
-        try:
-            if settings['max_btn']:
-                btn.append(
-                    [InlineKeyboardButton("ᴘᴀɢᴇ", callback_data="pages"), InlineKeyboardButton(
-                        text=f"1/{math.ceil(int(total_results)/10)}", callback_data="pages"), InlineKeyboardButton(text="ɴᴇxᴛ ⋟", callback_data=f"next_{req}_{key}_{offset}")]
-                )
-            else:
-                btn.append(
-                    [InlineKeyboardButton("ᴘᴀɢᴇ", callback_data="pages"), InlineKeyboardButton(
-                        text=f"1/{math.ceil(int(total_results)/int(MAX_B_TN))}", callback_data="pages"), InlineKeyboardButton(text="ɴᴇxᴛ ⋟", callback_data=f"next_{req}_{key}_{offset}")]
-                )
-        except KeyError:
-            await save_group_settings(message.chat.id, 'max_btn', True)
-            btn.append(
-                [InlineKeyboardButton("ᴘᴀɢᴇ", callback_data="pages"), InlineKeyboardButton(
-                    text=f"1/{math.ceil(int(total_results)/10)}", callback_data="pages"), InlineKeyboardButton(text="ɴᴇxᴛ ⋟", callback_data=f"next_{req}_{key}_{offset}")]
-            )
-    else:
-        btn.append([InlineKeyboardButton(text="↭ ɴᴏ ᴍᴏʀᴇ ᴘᴀɢᴇꜱ ᴀᴠᴀɪʟᴀʙʟᴇ ↭", callback_data="pages")])
-    if not settings["button"]:
-        cur_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
-        time_difference = timedelta(hours=cur_time.hour, minutes=cur_time.minute, seconds=(cur_time.second+(cur_time.microsecond/1000000))) - \
-            timedelta(hours=curr_time.hour, minutes=curr_time.minute, seconds=(
-                curr_time.second+(curr_time.microsecond/1000000)))
-        remaining_seconds = "{:.2f}".format(time_difference.total_seconds())
-        dreamx_title = clean_search_text(search)
-        cap = await get_cap(settings, remaining_seconds, files, message, total_results, dreamx_title, offset=1)
-        try:
-            if message.caption:
-                await message.reply_caption(caption=cap, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
-            else:
-                await message.reply_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
-        except MessageNotModified:
-            pass
-        except Exception as e:
-            logger.exception(e)
-            await message.reply_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
-    else:
-        try:
-            await message.reply_text(
-                text=script.FILE_SEND_MSG.format(message.from_user.mention),
-                reply_markup=InlineKeyboardMarkup(btn),
-                parse_mode=enums.ParseMode.HTML
-            )
-        except MessageNotModified:
-            pass
-    if spoll:
-        await msg.message.delete()
-
-
-async def advantage_spell_chok(client, msg):
-    mv_id = msg.id
-    mv_rqst = msg.text
-    reqstr1 = msg.from_user.id if msg.from_user else 0
-    reqstr = await client.get_users(reqstr1)
-    search = mv_rqst
-    settings = await get_settings(msg.chat.id)
-    if NO_RESULTS_MSG:
-        try:
-            await client.send_message(chat_id=BIN_CHANNEL, text=script.NORSLTS.format(reqstr.id, reqstr.mention, search))
-        except Exception as e:
-            print(f"Error In Spell Check - {e}   Make Sure Bot Admin BIN CHANNEL")
-    btn = [[
-        InlineKeyboardButton(
-            "📺 ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇsᴛ 📺", url=f"https://t.me/{temp.U_NAME}?start=request")
-    ]]
-    k = await msg.reply_text(script.I_CUDNT.format(mv_rqst), reply_markup=InlineKeyboardMarkup(btn))
-    await asyncio.sleep(60)
-    await k.delete()
-    try:
-        await msg.delete()
-    except:
-        pass
-
-
-# ---- CALLBACK HANDLERS ---- 
-
 @Client.on_callback_query(filters.regex(r"^reffff"))
 async def refercall(bot, query):
     btn = [[
@@ -345,7 +138,6 @@ async def refercall(bot, query):
         parse_mode=enums.ParseMode.HTML
     )
     await query.answer()
-
 
 @Client.on_callback_query(filters.regex(r"^next"))
 async def next_page(bot, query):
@@ -545,6 +337,10 @@ async def next_page(bot, query):
             logger.exception("Failed to send result: %s", e)
         except MessageNotModified:
             pass
+        # try:
+        #     await query.message.edit_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
+        # except MessageNotModified:
+        #     pass
     else:
         try:
             await query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(btn))
@@ -580,7 +376,6 @@ async def advantage_spoll_choker(bot, query):
         k = await query.message.edit(script.MVE_NT_FND, reply_markup=btn)
         await asyncio.sleep(10)
         await k.delete()
-
 
 # Qualities
 @Client.on_callback_query(filters.regex(r"^qualities#"))
@@ -1630,6 +1425,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer(f"⚠️ SOMETHING WENT WRONG STREAM LINK  \n\n{e}", show_alert=True)
             return
 
+
     elif query.data == "prestream":
         await query.answer(text=script.PRE_STREAM_ALERT, show_alert=True)
         dreamcinezone = await client.send_photo(
@@ -1657,6 +1453,364 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer("🔔 ꜱᴏʀʀʏ ᴛʜᴇ ᴘᴀɢᴇ ɪꜱ ɴᴏᴛ ʀᴇꜱᴘᴏɴᴅɪɴɢ ʀɪɢʜᴛ ɴᴏᴡ !!", show_alert=True)
         except:
             pass
+
+
+async def auto_filter(client, msg, spoll=False):
+    """
+    Core auto_filter logic with timing/debug logging removed.
+    """
+    curr_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
+
+    async def _schedule_delete(sent_obj, orig_msg, delay):
+        try:
+            await asyncio.sleep(delay)
+            try:
+                await sent_obj.delete()
+            except Exception:
+                pass
+            try:
+                await orig_msg.delete()
+            except Exception:
+                pass
+        except Exception:
+            # ignore scheduling errors
+            pass
+
+    # initialize to avoid NameError if reply_sticker fails
+    m = None
+
+    try:
+        if not spoll:
+            message = msg
+            if message.text.startswith("/"):
+                return
+            if re.findall(r"((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
+                return
+            if len(message.text) < 100:
+                message_text = message.text or ""
+                search = message_text.lower()
+
+                stick_id = "CAACAgIAAxkBAAEPhm5o439f8A4sUGO2VcnBFZRRYxAxmQACtCMAAphLKUjeub7NKlvk2TYE"
+                keyboard = InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(f'🔎 sᴇᴀʀᴄʜɪɴɢ {search}', callback_data="hiding")]]
+                )
+                try:
+                    m = await message.reply_sticker(sticker=stick_id, reply_markup=keyboard)
+                except Exception as e:
+                    logger.exception("reply_sticker failed: %s", e)
+
+                find = search.split(" ")
+                search = ""
+                removes = ["in", "upload", "series", "full",
+                           "horror", "thriller", "mystery", "print", "file"]
+                for x in find:
+                    if x in removes:
+                        continue
+                    else:
+                        search = search + x + " "
+                search = re.sub(
+                    r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|^h(e|a)?(l)*(o)*|mal(ayalam)?|t(h)?amil|file|that|find|und(o)*|kit(t(i|y)?)?o(w)?|thar(u)?(o)*w?|kittum(o)*|aya(k)*(um(o)*)?|full\smovie|any(one)|with\ssubtitle(s)?)",
+                    "", search, flags=re.IGNORECASE)
+                search = re.sub(r"\s+", " ", search).strip()
+                search = search.replace("-", " ")
+                search = search.replace(":", "")
+
+                files, offset, total_results = await get_search_results(message.chat.id, search, offset=0, filter=True)
+
+                settings = await get_settings(message.chat.id)
+                if not files:
+                    if settings.get("spell_check"):
+                        ai_sts = await m.edit('🤖 ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ, ᴀɪ ɪs ᴄʜᴇᴄᴋɪɴɢ ʏᴏᴜʀ sᴘᴇʟʟɪɴɢ...')
+                        is_misspelled = await ai_spell_check(chat_id=message.chat.id, wrong_name=search)
+
+                        if is_misspelled:
+                            await ai_sts.edit(f'✅ Aɪ Sᴜɢɢᴇsᴛᴇᴅ: <code>{is_misspelled}</code>\n🔍 Searching for it...')
+                            message.text = is_misspelled
+                            await ai_sts.delete()
+                            return await auto_filter(client, message)
+                        await ai_sts.delete()
+                        result = await advantage_spell_chok(client, message)
+                        return result
+                    else:
+                        try:
+                            if m:
+                                await m.delete()
+                        except Exception:
+                            pass
+                        result = await advantage_spell_chok(client, message)
+                        return result
+            else:
+                return
+        else:
+            # spoll branch
+            message = msg.message.reply_to_message
+            search, files, offset, total_results = spoll
+            m = await message.reply_text(f'🔎 sᴇᴀʀᴄʜɪɴɢ {search}', reply_to_message_id=message.id)
+            settings = await get_settings(message.chat.id)
+            await msg.message.delete()
+
+        key = f"{message.chat.id}-{message.id}"
+        FRESH[key] = search
+        temp.GETALL[key] = files
+        temp.SHORT[message.from_user.id] = message.chat.id
+
+        if settings.get('button'):
+            btn = [
+                [
+                    InlineKeyboardButton(text=f"🔗 {get_size(file.file_size)} ≽ " + clean_filename(
+                        file.file_name), callback_data=f'file#{file.file_id}'),
+                ]
+                for file in files
+            ]
+            btn.insert(0,
+                       [
+                           InlineKeyboardButton(
+                               f'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{key}"),
+                           InlineKeyboardButton(
+                               "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{key}"),
+                           InlineKeyboardButton(
+                               "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{key}")
+                       ]
+                       )
+            btn.insert(0,
+                       [
+                           InlineKeyboardButton(
+                               "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium"),
+                           InlineKeyboardButton(
+                               "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}")
+
+                       ])
+        else:
+            btn = []
+            btn.insert(0,
+                       [
+                           InlineKeyboardButton(
+                               f'Qᴜᴀʟɪᴛʏ', callback_data=f"qualities#{key}"),
+                           InlineKeyboardButton(
+                               "Lᴀɴɢᴜᴀɢᴇ", callback_data=f"languages#{key}"),
+                           InlineKeyboardButton(
+                               "Sᴇᴀsᴏɴ",  callback_data=f"seasons#{key}")
+                       ]
+                       )
+            btn.insert(0,
+                       [
+                           InlineKeyboardButton(
+                               "ʀᴇᴍᴏᴠᴇ ᴀᴅs", url=f"https://t.me/{temp.U_NAME}?start=premium"),
+                           InlineKeyboardButton(
+                               "Sᴇɴᴅ Aʟʟ", callback_data=f"sendfiles#{key}")
+                       ])
+
+        if offset != "":
+            req = message.from_user.id if message.from_user else 0
+            if ULTRA_FAST_MODE:
+                btn.append(
+                    [InlineKeyboardButton("ᴘᴀɢᴇ", callback_data="pages"), InlineKeyboardButton(
+                        text="1", callback_data="pages"), InlineKeyboardButton(text="ɴᴇxᴛ ⋟", callback_data=f"next_{req}_{key}_{offset}")]
+                )
+            else:
+                try:
+                    if settings['max_btn']:
+                        btn.append(
+                            [InlineKeyboardButton("ᴘᴀɢᴇ", callback_data="pages"), InlineKeyboardButton(
+                                text=f"1/{math.ceil(int(total_results)/10)}", callback_data="pages"), InlineKeyboardButton(text="ɴᴇxᴛ ⋟", callback_data=f"next_{req}_{key}_{offset}")]
+                        )
+                    else:
+                        btn.append(
+                            [InlineKeyboardButton("ᴘᴀɢᴇ", callback_data="pages"), InlineKeyboardButton(
+                                text=f"1/{math.ceil(int(total_results)/int(MAX_B_TN))}", callback_data="pages"), InlineKeyboardButton(text="ɴᴇxᴛ ⋟", callback_data=f"next_{req}_{key}_{offset}")]
+                        )
+                except KeyError:
+                    await save_group_settings(message.chat.id, 'max_btn', True)
+                    btn.append(
+                        [InlineKeyboardButton("ᴘᴀɢᴇ", callback_data="pages"), InlineKeyboardButton(
+                            text=f"1/{math.ceil(int(total_results)/10)}", callback_data="pages"), InlineKeyboardButton(text="ɴᴇxᴛ ⋟", callback_data=f"next_{req}_{key}_{offset}")]
+                    )
+        else:
+            btn.append([InlineKeyboardButton(
+                text="↭ ɴᴏ ᴍᴏʀᴇ ᴘᴀɢᴇꜱ ᴀᴠᴀɪʟᴀʙʟᴇ ↭", callback_data="pages")])
+
+        if settings.get('imdb'):
+            imdb = await get_posterx(search, file=(files[0]).file_name) if TMDB_POSTERS else await get_poster(search, file=(files[0]).file_name)
+        else:
+            imdb = None
+
+        cur_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
+        time_difference = timedelta(hours=cur_time.hour, minutes=cur_time.minute, seconds=(cur_time.second+(cur_time.microsecond/1000000))) - \
+            timedelta(hours=curr_time.hour, minutes=curr_time.minute,
+                      seconds=(curr_time.second+(curr_time.microsecond/1000000)))
+        remaining_seconds = "{:.2f}".format(time_difference.total_seconds())
+
+        TEMPLATE = script.IMDB_TEMPLATE_TXT
+        settings = await get_settings(message.chat.id)
+        if settings.get('template'):
+            TEMPLATE = settings['template']
+
+        if imdb:
+            cap = TEMPLATE.format(
+                query=search,
+                title=imdb['title'],
+                votes=imdb['votes'],
+                aka=imdb["aka"],
+                seasons=imdb["seasons"],
+                box_office=imdb['box_office'],
+                localized_title=imdb['localized_title'],
+                kind=imdb['kind'],
+                imdb_id=imdb["imdb_id"],
+                cast=imdb['cast'],
+                runtime=imdb['runtime'],
+                countries=imdb['countries'],
+                certificates=imdb['certificates'],
+                languages=imdb['languages'],
+                director=imdb['director'],
+                writer=imdb['writer'],
+                producer=imdb['producer'],
+                composer=imdb['composer'],
+                cinematographer=imdb['cinematographer'],
+                music_team=imdb['music_team'],
+                distributors=imdb['distributors'],
+                release_date=imdb['release_date'],
+                year=imdb['year'],
+                genres=imdb['genres'],
+                poster=imdb['poster'],
+                plot=imdb['plot'] if settings.get('button') else "N/A",
+                rating=imdb['rating'],
+                url=imdb['url'],
+                **locals()
+            )
+            temp.IMDB_CAP[message.from_user.id] = cap
+            if not settings.get('button'):
+                cap += "\n\n<b><u>Your Requested Files Are Here</u></b>\n\n"
+                for idx, file in enumerate(files, start=1):
+                    cap += f"<b>\n{idx}. <a href='https://telegram.me/{temp.U_NAME}?start=file_{message.chat.id}_{file.file_id}'>[{get_size(file.file_size)}] {clean_filename(file.file_name)}\n</a></b>"
+        else:
+            temp.IMDB_CAP[message.from_user.id] = None
+            if ULTRA_FAST_MODE:
+                if settings.get('button'):
+                    cap = f"<b>🏷 ᴛɪᴛʟᴇ : <code>{search}</code>\n⏰ ʀᴇsᴜʟᴛ ɪɴ : <code>{remaining_seconds} Sᴇᴄᴏɴᴅs</code>\n\n📝 ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ : {message.from_user.mention}\n⚠️ ᴍᴏᴅᴇʀᴀᴛᴇᴅ ʙʏ : ⚡ {message.chat.title or temp.B_LINK or 'iP Update'} \n\n<u>Your Requested Files Are Here</u> \n\n</b>"
+                else:
+                    cap = f"<b>🏷 ᴛɪᴛʟᴇ : <code>{search}</code>\n⏰ ʀᴇsᴜʟᴛ ɪɴ : <code>{remaining_seconds} Sᴇᴄᴏɴᴅs</code>\n\n📝 ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ : {message.from_user.mention}\n⚠️ ᴍᴏᴅᴇʀᴀᴛᴇᴅ ʙʏ : ⚡ {message.chat.title or temp.B_LINK or 'iP Update'} \n\n<u>Your Requested Files Are Here</u> \n\n</b>"
+                    for idx, file in enumerate(files, start=1):
+                        cap += f"<b>\n{idx}. <a href='https://telegram.me/{temp.U_NAME}?start=file_{message.chat.id}_{file.file_id}'>[{get_size(file.file_size)}] {clean_filename(file.file_name)}\n</a></b>"
+            else:
+                if settings.get('button'):
+                    cap = f"<b>🏷 ᴛɪᴛʟᴇ : <code>{search}</code>\n🧱 ᴛᴏᴛᴀʟ ғɪʟᴇs : <code>{total_results}</code>\n⏰ ʀᴇsᴜʟᴛ ɪɴ : <code>{remaining_seconds} Sᴇᴄᴏɴᴅs</code>\n\n📝 ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ : {message.from_user.mention}\n⚠️ ᴍᴏᴅᴇʀᴀᴛᴇᴅ ʙʏ : ⚡ {message.chat.title or temp.B_LINK or 'iP Update'} \n\n<u>Your Requested Files Are Here</u> \n\n</b>"
+                else:
+                    cap = f"<b>🏷 ᴛɪᴛʟᴇ : <code>{search}</code>\n🧱 ᴛᴏᴛᴀʟ ғɪʟᴇs : <code>{total_results}</code>\n⏰ ʀᴇsᴜʟᴛ ɪɴ : <code>{remaining_seconds} Sᴇᴄᴏɴᴅs</code>\n\n📝 ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ : {message.from_user.mention}\n⚠️ ᴍᴏᴅᴇʀᴀᴛᴇᴅ ʙʏ : ⚡ {message.chat.title or temp.B_LINK or 'iP Update'} \n\n<u>Your Requested Files Are Here</u> \n\n</b>"
+
+                    for idx, file in enumerate(files, start=1):
+                        cap += f"<b>\n{idx}. <a href='https://telegram.me/{temp.U_NAME}?start=file_{message.chat.id}_{file.file_id}'>[{get_size(file.file_size)}] {clean_filename(file.file_name)}\n</a></b>"
+
+        sent = None
+        try:
+            if imdb and imdb.get('poster'):
+                try:
+                    if TMDB_POSTERS:
+                        photo = imdb.get('backdrop') if imdb.get('backdrop') and LANDSCAPE_POSTER else imdb.get('poster')
+                    else:
+                        photo = imdb.get('poster')
+                    sent = await message.reply_photo(photo=photo, caption=cap, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+                    if m:
+                        await m.delete()
+                except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
+                    pic = imdb.get('poster')
+                    poster = pic.replace('.jpg', "._V1_UX360.jpg")
+                    sent = await message.reply_photo(photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+                    if m:
+                        await m.delete()
+                except Exception as e:
+                    logger.exception(e)
+                    sent = await message.reply_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
+            else:
+                sent = await message.reply_text(text=cap, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
+                if m:
+                    await m.delete()
+        except Exception as e:
+            logger.exception("Failed to send result: %s", e)
+            return
+
+        try:
+            if settings.get('auto_delete'):
+                asyncio.create_task(_schedule_delete(sent, message, DELETE_TIME))
+        except KeyError:
+            try:
+                await save_group_settings(message.chat.id, 'auto_delete', True)
+            except Exception:
+                pass
+            asyncio.create_task(_schedule_delete(sent, message, DELETE_TIME))
+        return
+
+    except Exception as e:
+        logger.exception(e)
+        return
+
+async def ai_spell_check(chat_id, wrong_name):
+    async def search_movie(wrong_name):
+        search_results = imdb.search_movie(wrong_name)
+        movie_list = [movie['title'] for movie in search_results]
+        return movie_list
+    movie_list = await search_movie(wrong_name)
+    if not movie_list:
+        return
+    for _ in range(5):
+        closest_match = process.extractOne(wrong_name, movie_list)
+        if not closest_match or closest_match[1] <= 80:
+            return
+        movie = closest_match[0]
+        files, _, _ = await get_search_results(chat_id=chat_id, query=movie)
+        if files:
+            return movie
+        movie_list.remove(movie)
+
+
+async def advantage_spell_chok(client, message):
+    mv_id = message.id
+    search = message.text
+    chat_id = message.chat.id
+    settings = await get_settings(chat_id)
+    query = re.sub(
+        r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|^h(e|a)?(l)*(o)*|mal(ayalam)?|t(h)?amil|file|that|find|und(o)*|kit(t(i|y)?)?o(w)?|thar(u)?(o)*w?|kittum(o)*|aya(k)*(um(o)*)?|full\smovie|any(one)|with\ssubtitle(s)?)",
+        "", message.text, flags=re.IGNORECASE)
+    query = query.strip() + " movie"
+    try:
+        movies = await get_poster(search, bulk=True)
+    except:
+        k = await message.reply(script.I_CUDNT.format(message.from_user.mention))
+        await asyncio.sleep(60)
+        await k.delete()
+        try:
+            await message.delete()
+        except:
+            pass
+        return
+    if not movies:
+        google = search.replace(" ", "+")
+        # Modified: Added Admin Request button
+        buttons = [
+            [InlineKeyboardButton("🔍 ᴄʜᴇᴄᴋ sᴘᴇʟʟɪɴɢ ᴏɴ ɢᴏᴏɢʟᴇ 🔍", url=f"https://www.google.com/search?q={google}")],
+            [InlineKeyboardButton("📢 Sᴇɴᴅ Rᴇǫᴜᴇsᴛ ᴛᴏ Aᴅᴍɪɴ 📢", callback_data=f"req_{search}")]
+        ]
+        k = await message.reply_text(text=script.I_CUDNT.format(search), reply_markup=InlineKeyboardMarkup(buttons))
+        await asyncio.sleep(60)
+        await k.delete()
+        try:
+            await message.delete()
+        except:
+            pass
+        return
+    user = message.from_user.id if message.from_user else 0
+    buttons = [
+        [InlineKeyboardButton(text=movie.get('title'), callback_data=f"spol#{movie.movieID}#{user}")
+         ] for movie in movies]
+
+    buttons.append([InlineKeyboardButton(
+        text="🚫 ᴄʟᴏsᴇ 🚫", callback_data='close_data')])
+    d = await message.reply_text(text=script.CUDNT_FND.format(message.from_user.mention), reply_markup=InlineKeyboardMarkup(buttons), reply_to_message_id=message.id)
+    await asyncio.sleep(60)
+    await d.delete()
+    try:
+        await message.delete()
+    except:
+        pass
 
 
 # ==================== ADMIN REQUEST HANDLER ====================
