@@ -1498,9 +1498,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.answer(MSG_ALRT)
 
     elif query.data == "about":
+        # SOURCE BUTTON REMOVED FROM HERE
         buttons = [[
             InlineKeyboardButton('‼️ ᴅɪsᴄʟᴀɪᴍᴇʀ ‼️', callback_data='disclaimer'),
-            InlineKeyboardButton ('🪔 sᴏᴜʀᴄᴇ', callback_data='source'),
         ],[
             InlineKeyboardButton('ᴅᴏɴᴀᴛɪᴏɴ 💰', callback_data='donation'),
         ],[
@@ -1528,17 +1528,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.answer(MSG_ALRT)
 
     elif query.data == "source":
-        buttons = [[
-            InlineKeyboardButton('Source Code 📜', url='https://t.me/royalkrrishna'),
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='about')
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.SOURCE_TXT,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-        await query.answer(MSG_ALRT)
+        # Source button handler removed - this will now go to else block
+        await query.answer("🔔 This option is not available.", show_alert=True)
 
     elif query.data == "donation":
         buttons = [[
