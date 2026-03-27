@@ -1449,54 +1449,60 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except:
             pass
     
-    # ==================== START BUTTON MODIFIED ====================
-  elif query.data == "start":
-    # Channel and Group buttons in first row
-    buttons = [[
-        InlineKeyboardButton('📢 ᴄʜᴀɴɴᴇʟ 📢', url=CHANNEL_LNK),
-        InlineKeyboardButton('👥 ɢʀᴏᴜᴘ 👥', url=GROUP_LNK)
-    ],[
-        InlineKeyboardButton(' ʜᴇʟᴘ 📢', callback_data='help'),
-        InlineKeyboardButton(' ᴀʙᴏᴜᴛ 📖', callback_data='about')
-    ],[
-        InlineKeyboardButton('ᴛᴏᴘ sᴇᴀʀᴄʜɪɴɢ ⭐', callback_data="topsearch"),
-        InlineKeyboardButton('ᴜᴘɢʀᴀᴅᴇ 🎟', callback_data="premium_info"),
-    ]]
-    reply_markup = InlineKeyboardMarkup(buttons)
-    current_time = datetime.now(pytz.timezone(TIMEZONE))
-    curr_time = current_time.hour
-    if curr_time < 12:
-        gtxt = "ɢᴏᴏᴅ ᴍᴏʀɴɪɴɢ 🌞"
-    elif curr_time < 17:
-        gtxt = "ɢᴏᴏᴅ ᴀғᴛᴇʀɴᴏᴏɴ 🌤"
-    elif curr_time < 21:
-        gtxt = "ɢᴏᴏᴅ ᴇᴠᴇɴɪɴɢ 🌘"
-    else:
-        gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
-    try:
-        await client.edit_message_media(
-            query.message.chat.id,
-            query.message.id,
-            InputMediaPhoto(random.choice(PICS))
+    elif query.data == "start":
+        buttons = [[
+            InlineKeyboardButton('🔰 ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ 🔰', url=f'http://telegram.me/{temp.U_NAME}?startgroup=true')
+        ],[
+            InlineKeyboardButton(' ʜᴇʟᴘ 📢', callback_data='help'),
+            InlineKeyboardButton(' ᴀʙᴏᴜᴛ 📖', callback_data='about')
+        ],[
+            InlineKeyboardButton('ᴛᴏᴘ sᴇᴀʀᴄʜɪɴɢ ⭐', callback_data="topsearch"),
+            InlineKeyboardButton('ᴜᴘɢʀᴀᴅᴇ 🎟', callback_data="premium_info"),
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        current_time = datetime.now(pytz.timezone(TIMEZONE))
+        curr_time = current_time.hour
+        if curr_time < 12:
+            gtxt = "ɢᴏᴏᴅ ᴍᴏʀɴɪɴɢ 🌞"
+        elif curr_time < 17:
+            gtxt = "ɢᴏᴏᴅ ᴀғᴛᴇʀɴᴏᴏɴ 🌤"
+        elif curr_time < 21:
+            gtxt = "ɢᴏᴏᴅ ᴇᴠᴇɴɪɴɢ 🌘"
+        else:
+            gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
+        try:
+            await client.edit_message_media(
+                query.message.chat.id,
+                query.message.id,
+                InputMediaPhoto(random.choice(PICS))
+            )
+        except Exception as e:
+            pass
+        await query.message.edit_text(
+            text=script.START_TXT.format(query.from_user.mention, gtxt, temp.U_NAME, temp.B_NAME),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
         )
-    except Exception as e:
-        pass
-    await query.message.edit_text(
-        text=script.START_TXT.format(query.from_user.mention, gtxt, temp.U_NAME, temp.B_NAME),
-        reply_markup=reply_markup,
-        parse_mode=enums.ParseMode.HTML
-    )
-    await query.answer(MSG_ALRT)
+        await query.answer(MSG_ALRT)
 
-    # ==================== ABOUT BUTTON MODIFIED ====================
+    elif query.data == "help":
+        buttons = [[
+            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text(
+            text=script.HELP_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+        await query.answer(MSG_ALRT)
+
     elif query.data == "about":
-        # Added Admin Support button
+        # SOURCE BUTTON REMOVED FROM HERE
         buttons = [[
             InlineKeyboardButton('‼️ ᴅɪsᴄʟᴀɪᴍᴇʀ ‼️', callback_data='disclaimer'),
         ],[
             InlineKeyboardButton('ᴅᴏɴᴀᴛɪᴏɴ 💰', callback_data='donation'),
-        ],[
-            InlineKeyboardButton('🛠️ ᴀᴅᴍɪɴ sᴜᴘᴘᴏʀᴛ 🛠️', url=OWNER_LNK),
         ],[
             InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
         ]]
@@ -1520,6 +1526,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.HTML
         )
         await query.answer(MSG_ALRT)
+
+    elif query.data == "source":
+        # Source button handler removed - this will now go to else block
+        await query.answer("🔔 This option is not available.", show_alert=True)
 
     elif query.data == "donation":
         buttons = [[
