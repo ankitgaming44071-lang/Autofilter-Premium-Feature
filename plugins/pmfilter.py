@@ -1449,9 +1449,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except:
             pass
     
+    # ==================== START BUTTON MODIFIED ====================
     elif query.data == "start":
+        # Channel and Group buttons added, removed "Add me to your group"
         buttons = [[
-            InlineKeyboardButton('🔰 ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ 🔰', url=f'http://telegram.me/{temp.U_NAME}?startgroup=true')
+            InlineKeyboardButton('📢 ᴄʜᴀɴɴᴇʟ 📢', url=CHANNEL_LNK),
+            InlineKeyboardButton('👥 ɢʀᴏᴜᴘ 👥', url=GROUP_LNK)
         ],[
             InlineKeyboardButton(' ʜᴇʟᴘ 📢', callback_data='help'),
             InlineKeyboardButton(' ᴀʙᴏᴜᴛ 📖', callback_data='about')
@@ -1497,12 +1500,15 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
         await query.answer(MSG_ALRT)
 
+    # ==================== ABOUT BUTTON MODIFIED ====================
     elif query.data == "about":
-        # SOURCE BUTTON REMOVED FROM HERE
+        # Added Admin Support button
         buttons = [[
             InlineKeyboardButton('‼️ ᴅɪsᴄʟᴀɪᴍᴇʀ ‼️', callback_data='disclaimer'),
         ],[
             InlineKeyboardButton('ᴅᴏɴᴀᴛɪᴏɴ 💰', callback_data='donation'),
+        ],[
+            InlineKeyboardButton('🛠️ ᴀᴅᴍɪɴ sᴜᴘᴘᴏʀᴛ 🛠️', url=OWNER_LNK),
         ],[
             InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
         ]]
@@ -1526,10 +1532,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.HTML
         )
         await query.answer(MSG_ALRT)
-
-    elif query.data == "source":
-        # Source button handler removed - this will now go to else block
-        await query.answer("🔔 This option is not available.", show_alert=True)
 
     elif query.data == "donation":
         buttons = [[
