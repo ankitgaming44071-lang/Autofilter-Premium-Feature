@@ -1451,7 +1451,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     
     # ==================== START BUTTON MODIFIED ====================
     elif query.data == "start":
-        # Channel and Group buttons added, removed "Add me to your group"
+        # Channel and Group buttons in first row
         buttons = [[
             InlineKeyboardButton('📢 ᴄʜᴀɴɴᴇʟ 📢', url=CHANNEL_LNK),
             InlineKeyboardButton('👥 ɢʀᴏᴜᴘ 👥', url=GROUP_LNK)
