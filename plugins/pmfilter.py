@@ -696,7 +696,7 @@ async def seasons_cb_handler(client: Client, query: CallbackQuery):
     try:
         if int(query.from_user.id) not in [query.message.reply_to_message.from_user.id, 0]:
             return await query.answer(
-                f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\nᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ…",
+                f"⚠️ ʜᴇʟʟᴏ {query.from_user.first_name},\nᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇǫᴜᴇꜱᴛ,\nʀᴇǫᴜᴇꜱᴛ ʏᴏᴜʀ'ꜱ…",
                 show_alert=True,
             )
     except Exception:
@@ -716,7 +716,7 @@ async def seasons_cb_handler(client: Client, query: CallbackQuery):
 
     btn.insert(
         0,
-        [InlineKeyboardButton("⇊ ꜱᴇʟᴇᴄᴛ ꜱᴇᴀꜱᴏɴ ⇊", callback_data="ident")],
+        [InlineKeyboardButton("⇊ ꜱᴇʟᴇᴄᴛ ꜱᴇᴀꜱᴏɴ ⇊", callback_data="ident")],
     )
     btn.append([InlineKeyboardButton(text="↭ ʙᴀᴄᴋ ᴛᴏ ꜰɪʟᴇs ​↭",
                callback_data=f"next_{req}_{key}_{offset}")])
@@ -841,6 +841,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
         link = await client.create_chat_invite_link(int(REQST_CHANNEL))
     except:
         pass
+    
+    # Define admin IDs - ADD YOUR ADMIN IDs HERE
+    ADMIN_IDS = [8289318973]  # Replace with your admin user IDs
+    
     if query.data == "close_data":
         try:
             user = query.message.reply_to_message.from_user.id
@@ -957,7 +961,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except Exception as e:
             await log_error(client, f"❌ Error in checksub callback:\n\n{repr(e)}")
             logger.error(f"❌ Error in checksub callback:\n\n{repr(e)}")
-
 
     elif query.data.startswith("killfilesdq"):
         ident, keyword = query.data.split("#")
@@ -1356,7 +1359,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ sᴜғғɪᴄɪᴇɴᴛ ʀɪɢʜᴛs ᴛᴏ ᴅᴏ ᴛʜɪs ❌", show_alert=True)
 
     elif query.data.startswith("hnalert"):
-        ident, from_user = query.data.split("#")  # Hindi Not Available
+        ident, from_user = query.data.split("#")
         if int(query.from_user.id) == int(from_user):
             user = await client.get_users(from_user)
             await query.answer(
@@ -1367,7 +1370,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer("Nᴏᴛ ᴀʟʟᴏᴡᴇᴅ — ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴛʜᴇ ʀᴇǫᴜᴇꜱᴛᴇʀ ❌", show_alert=True)
 
     elif query.data.startswith("nralert"):
-        ident, from_user = query.data.split("#")  # Not Released
+        ident, from_user = query.data.split("#")
         if int(query.from_user.id) == int(from_user):
             user = await client.get_users(from_user)
             await query.answer(
@@ -1378,7 +1381,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer("Yᴏᴜ ᴄᴀɴ'ᴛ ᴅᴏ ᴛʜɪꜱ ᴀꜱ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴛʜᴇ ᴏʀɪɢɪɴᴀʟ ʀᴇǫᴜᴇꜱᴛᴇʀ ❌", show_alert=True)
 
     elif query.data.startswith("wsalert"):
-        ident, from_user = query.data.split("#")  # Wrong Spelling
+        ident, from_user = query.data.split("#")
         if int(query.from_user.id) == int(from_user):
             user = await client.get_users(from_user)
             await query.answer(
@@ -1403,8 +1406,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
                 quote=True,
                 disable_web_page_preview=True,
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🚀 Fast Download 🚀", url=dreamx_download),  # we download Link
-                                                    InlineKeyboardButton('🖥️ Watch online 🖥️', url=dreamx_stream)]])  # web stream Link
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🚀 Fast Download 🚀", url=dreamx_download),
+                                                    InlineKeyboardButton('🖥️ Watch online 🖥️', url=dreamx_stream)]])
             )
             dreamcinezone = await query.edit_message_reply_markup(
                 reply_markup=InlineKeyboardMarkup([
@@ -1425,7 +1428,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer(f"⚠️ SOMETHING WENT WRONG STREAM LINK  \n\n{e}", show_alert=True)
             return
 
-
     elif query.data == "prestream":
         await query.answer(text=script.PRE_STREAM_ALERT, show_alert=True)
         dreamcinezone = await client.send_photo(
@@ -1439,7 +1441,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await asyncio.sleep(DELETE_TIME)
         await dreamcinezone.delete()
 
-
     elif query.data == "pagesn1":
         await query.answer(text=script.PAGE_TXT, show_alert=True)
 
@@ -1447,16 +1448,36 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.answer(text=script.SINFO, show_alert=True)
 
     elif query.data == "start":
-        buttons = [[
-                    InlineKeyboardButton('🔰 ɢʀᴏᴜᴘ 🔰', url=f'https://t.me/test122425/{temp.U_NAME}?startgroup=true'),
-                    InlineKeyboardButton('📢 ᴊᴏɪɴ ᴏᴜʀ ɢʀᴏᴜᴘ 📢', url='https://t.me/test122425')
-                ],[
-                    InlineKeyboardButton(' ʜᴇʟᴘ 📢', callback_data='help'),
-                    InlineKeyboardButton(' ᴀʙᴏᴜᴛ 📖', callback_data='about')
-                ],[
-                    InlineKeyboardButton('RANKING ⭐', callback_data="topsearch"),
-                     InlineKeyboardButton('PREMIUM 🎟', callback_data="premium_info"),
-                ]]
+        # Check if user is admin (hardcoded admin list)
+        is_admin = query.from_user.id in ADMIN_IDS
+        
+        # Create buttons based on admin status
+        buttons = []
+        
+        # Admin-only button - Add Bot to Group
+        if is_admin:
+            buttons.append([
+                InlineKeyboardButton('🔰 ɢʀᴏᴜᴘ 🔰', url=f'https://t.me/test122425/{temp.U_NAME}?startgroup=true'),
+                InlineKeyboardButton('📢 ᴊᴏɪɴ ᴏᴜʀ ɢʀᴏᴜᴘ 📢', url='https://t.me/test122425')
+            ])
+        else:
+            # Normal users only see the join group button
+            buttons.append([
+                InlineKeyboardButton('📢 ᴊᴏɪɴ ᴏᴜʀ ɢʀᴏᴜᴘ 📢', url='https://t.me/test122425')
+            ])
+        
+        # Common buttons for everyone
+        buttons.extend([
+            [
+                InlineKeyboardButton(' ʜᴇʟᴘ 📢', callback_data='help'),
+                InlineKeyboardButton(' ᴀʙᴏᴜᴛ 📖', callback_data='about')
+            ],
+            [
+                InlineKeyboardButton('RANKING ⭐', callback_data="topsearch"),
+                InlineKeyboardButton('PREMIUM 🎟', callback_data="premium_info"),
+            ]
+        ])
+        
         reply_markup = InlineKeyboardMarkup(buttons)
         current_time = datetime.now(pytz.timezone(TIMEZONE))
         curr_time = current_time.hour
@@ -1521,6 +1542,246 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('🛠️ ᴀᴅᴍɪɴ sᴜᴘᴘᴏʀᴛ 🛠️', url=OWNER_LNK),
         ],[
             InlineKeyboardButton('‼️ ᴅɪꜱᴄʟᴀɪᴍᴇʀ ‼️', callback_data='disclaimer'),
+        ],[
+            InlineKeyboardButton('ᴅᴏɴᴀᴛɪᴏɴ 💰', callback_data='donation'),
+        ],[
+            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text(
+            text=script.ABOUT_TXT.format(temp.U_NAME, temp.B_NAME, OWNER_LNK),
+            reply_markup=reply_markup,
+            disable_web_page_preview=True,
+            parse_mode=enums.ParseMode.HTML
+        )
+
+    elif query.data == "give_trial":
+        try:
+            user_id = query.from_user.id
+            has_free_trial = await db.check_trial_status(user_id)
+            if has_free_trial:
+                await query.answer(
+                    "🚸 ʏᴏᴜ'ᴠᴇ ᴀʟʀᴇᴀᴅʏ ᴄʟᴀɪᴍᴇᴅ ʏᴏᴜʀ ꜰʀᴇᴇ ᴛʀɪᴀʟ ᴏɴᴄᴇ !\n\n📌 ᴄʜᴇᴄᴋᴏᴜᴛ ᴏᴜʀ ᴘʟᴀɴꜱ ʙʏ : /plan",
+                    show_alert=True
+                )
+                return
+            else:
+                await db.give_free_trial(user_id)
+                await query.answer("✅ Trial activated!", show_alert=True)
+
+                msg = await client.send_photo(
+                    chat_id=query.message.chat.id,
+                    photo="https://i.ibb.co/0jC8MSDZ/photo-2025-07-26-10-42-36-7531339283701956616.jpg",
+                    caption=(
+                        "<b>🥳 ᴄᴏɴɢʀᴀᴛᴜʟᴀᴛɪᴏɴꜱ\n\n"
+                        "🎉 ʏᴏᴜ ᴄᴀɴ ᴜsᴇ ꜰʀᴇᴇ ᴛʀᴀɪʟ ꜰᴏʀ <u>5 ᴍɪɴᴜᴛᴇs</u> ꜰʀᴏᴍ ɴᴏᴡ !\n\n"
+                        "ɴᴇᴇᴅ ᴘʀᴇᴍɪᴜᴍ 👉🏻 /plan</b>"
+                    ),
+                    parse_mode=enums.ParseMode.HTML,
+                    reply_markup=InlineKeyboardMarkup([[
+                        InlineKeyboardButton("🚀 Buy Premium 🚀", callback_data="premium_info")
+                    ]])
+                )
+                await asyncio.sleep(DELETE_TIME)
+                return await msg.delete()
+        except Exception as e:
+            logging.exception("Error in give_trial callback")
+
+    elif query.data == "source":
+        buttons = [[
+            InlineKeyboardButton('Source Code 📜', url='https://t.me/royalkrrishna'),
+            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='about')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text(
+            text=script.SOURCE_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+
+    elif query.data == "ref_point":
+        await query.answer(f'You Have: {referdb.get_refer_points(query.from_user.id)} Refferal points.', show_alert=True)
+
+    elif query.data == "disclaimer":
+            btn = [[
+                    InlineKeyboardButton("⇋ ʙᴀᴄᴋ ⇋", callback_data="about")
+                  ]]
+            reply_markup = InlineKeyboardMarkup(btn)
+            await query.message.edit_text(
+                text=(script.DISCLAIMER_TXT),
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML
+            )
+
+    elif query.data == "premium_info":
+        try:
+            btn = [[
+                InlineKeyboardButton('• ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •', callback_data='buy_info'),
+            ],[
+                InlineKeyboardButton('• ʀᴇꜰᴇʀ ꜰʀɪᴇɴᴅꜱ', callback_data='reffff'),
+                InlineKeyboardButton('ꜰʀᴇᴇ ᴛʀɪᴀʟ •', callback_data='give_trial')
+            ],[
+                InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
+            ]]
+            reply_markup = InlineKeyboardMarkup(btn)
+            await client.edit_message_media(
+                chat_id=query.message.chat.id,
+                message_id=query.message.id,
+                media=InputMediaPhoto(media=SUBSCRIPTION, caption=script.BPREMIUM_TXT, parse_mode=enums.ParseMode.HTML),
+                reply_markup=reply_markup
+            )
+        except Exception as e:
+            logging.exception("Exception in 'premium_info' callback")
+
+    elif query.data == "buy_info":
+        try:
+            btn = [[
+                InlineKeyboardButton('ꜱᴛᴀʀ', callback_data='star_info'),
+                InlineKeyboardButton('ᴜᴘɪ', callback_data='upi_info')
+            ],[
+                InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ ⇋', callback_data='premium_info')
+            ]]
+            reply_markup = InlineKeyboardMarkup(btn)
+            await client.edit_message_media(
+                chat_id=query.message.chat.id,
+                message_id=query.message.id,
+                media=InputMediaPhoto(media=SUBSCRIPTION, caption=script.PREMIUM_TEXT, parse_mode=enums.ParseMode.HTML),
+                reply_markup=reply_markup
+            )
+        except Exception as e:
+            logging.exception("Exception in 'buy_info' callback")
+
+    elif query.data == "upi_info":
+        try:
+            btn = [[
+                InlineKeyboardButton('• ꜱᴇɴᴅ  ᴘᴀʏᴍᴇɴᴛ ꜱᴄʀᴇᴇɴꜱʜᴏᴛ •', url=OWNER_LNK),
+            ],[
+                InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='buy_info')
+            ]]
+            reply_markup = InlineKeyboardMarkup(btn)
+            await client.edit_message_media(
+                chat_id=query.message.chat.id,
+                message_id=query.message.id,
+                media=InputMediaPhoto(media=SUBSCRIPTION, caption=script.PREMIUM_UPI_TEXT.format(OWNER_UPI_ID), parse_mode=enums.ParseMode.HTML),
+                reply_markup=reply_markup
+            )
+        except Exception as e:
+            logging.exception("Exception in 'upi_info' callback")
+
+    elif query.data == "star_info":
+        try:
+            btn = [
+                InlineKeyboardButton(f"{stars}⭐", callback_data=f"buy_{stars}")
+                for stars, days in STAR_PREMIUM_PLANS.items()
+            ]
+            buttons = [btn[i:i + 2] for i in range(0, len(btn), 2)]
+            buttons.append([InlineKeyboardButton("⋞ ʙᴀᴄᴋ", callback_data="buy_info")])
+            reply_markup = InlineKeyboardMarkup(buttons)
+            await client.edit_message_media(
+                chat_id=query.message.chat.id,
+                message_id=query.message.id,
+                media=InputMediaPhoto(media=SUBSCRIPTION, caption=script.PREMIUM_STAR_TEXT, parse_mode=enums.ParseMode.HTML),
+                reply_markup=reply_markup
+            )
+        except Exception as e:
+            logging.exception("Exception in 'star' callback")
+
+    elif query.data.startswith("grp_pm"):
+        _, grp_id = query.data.split("#")
+        user_id = query.from_user.id if query.from_user else None
+        if not await is_check_admin(client, int(grp_id), user_id):
+            return await query.answer(script.NT_ADMIN_ALRT_TXT, show_alert=True)
+
+        btn = await group_setting_buttons(int(grp_id))
+        dreamx = await client.get_chat(int(grp_id))
+        await query.message.edit(text=f"ᴄʜᴀɴɢᴇ ʏᴏᴜʀ ɢʀᴏᴜᴘ ꜱᴇᴛᴛɪɴɢꜱ ✅\nɢʀᴏᴜᴘ ɴᴀᴍᴇ - '{dreamx.title}'</b>⚙", reply_markup=InlineKeyboardMarkup(btn))
+
+    elif query.data.startswith("removegrp"):
+        user_id = query.from_user.id
+        data = query.data
+        grp_id = int(data.split("#")[1])
+        if not await is_check_admin(client, grp_id, query.from_user.id):
+            return await query.answer(script.NT_ADMIN_ALRT_TXT, show_alert=True)
+        await db.remove_group_connection(grp_id, user_id)
+        await query.answer("Group removed from your connections.", show_alert=True)
+        connected_groups = await db.get_connected_grps(user_id)
+        if not connected_groups:
+            await query.edit_message_text("Nᴏ Cᴏɴɴᴇᴄᴛᴇᴅ Gʀᴏᴜᴘs Fᴏᴜɴᴅ .")
+            return
+        group_list = []
+        for group in connected_groups:
+            try:
+                Chat = await client.get_chat(group)
+                group_list.append([
+                    InlineKeyboardButton(
+                        text=Chat.title, callback_data=f"grp_pm#{Chat.id}")
+                ])
+            except Exception as e:
+                print(f"Error In PM Settings Button - {e}")
+                pass
+        await query.edit_message_text(
+            "⚠️ ꜱᴇʟᴇᴄᴛ ᴛʜᴇ ɢʀᴏᴜᴘ ᴡʜᴏꜱᴇ ꜱᴇᴛᴛɪɴɢꜱ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴄʜᴀɴɢᴇ.\n\n"
+            "ɪꜰ ʏᴏᴜʀ ɢʀᴏᴜᴘ ɪꜱ ɴᴏᴛ ꜱʜᴏᴡɪɴɢ ʜᴇʀᴇ,\n"
+            "ᴜꜱᴇ /reload ɪɴ ᴛʜᴀᴛ ɢʀᴏᴜᴘ ᴀɴᴅ ɪᴛ ᴡɪʟʟ ᴀᴘᴘᴇᴀʀ ʜᴇʀᴇ.",
+            reply_markup=InlineKeyboardMarkup(group_list)
+        )
+
+    elif query.data.startswith("setgs"):
+        ident, set_type, status, grp_id = query.data.split("#")
+        userid = query.from_user.id if query.from_user else None
+        if not await is_check_admin(client, int(grp_id), userid):
+            await query.answer(script.NT_ADMIN_ALRT_TXT, show_alert=True)
+            return
+        if status == "True":
+            await save_group_settings(int(grp_id), set_type, False)
+            await query.answer("ᴏꜰꜰ ✗")
+        else:
+            await save_group_settings(int(grp_id), set_type, True)
+            await query.answer("ᴏɴ ✓")
+        settings = await get_settings(int(grp_id))
+        if settings is not None:
+            btn = await group_setting_buttons(int(grp_id))
+            reply_markup = InlineKeyboardMarkup(btn)
+            await query.message.edit_reply_markup(reply_markup)
+    await query.answer(MSG_ALRT)
+
+    elif query.data == "donation":
+        buttons = [[
+                InlineKeyboardButton('🌲 Sᴇɴᴅ Dᴏɴᴀᴛᴇ Sᴄʀᴇᴇɴsʜᴏᴛ Hᴇʀᴇ', url=OWNER_LNK)
+            ],[
+                InlineKeyboardButton('⇍ ʙᴀᴄᴋ ⇏', callback_data='about')
+            ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text(text="● ◌ ◌")
+        await query.message.edit_text(text="● ● ◌")
+        await query.message.edit_text(text="● ● ●")
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await client.edit_message_media(
+            query.message.chat.id,
+            query.message.id,
+            InputMediaPhoto('https://graph.org/file/99eebf5dbe8a134f548e0.jpg')
+        )
+        await query.message.edit_text(
+            text=script.DREAMXBOTZ_DONATION.format(query.from_user.mention, QR_CODE, OWNER_UPI_ID),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+
+    elif query.data == "help":
+        buttons = [[
+            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text(
+            text=script.HELP_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+
+    elif query.data == "about":
+        buttons = [[
+            InlineKeyboardButton('‼️ ᴅɪꜱᴄʟᴀɪᴍᴇʀ ‼️', callback_data='disclaimer'),
+            InlineKeyboardButton ('🪔 sᴏᴜʀᴄᴇ', callback_data='source'),
         ],[
             InlineKeyboardButton('ᴅᴏɴᴀᴛɪᴏɴ 💰', callback_data='donation'),
         ],[
