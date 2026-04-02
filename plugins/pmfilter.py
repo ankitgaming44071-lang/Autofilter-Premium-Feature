@@ -1457,12 +1457,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
         # Admin-only button - Add Bot to Group
         if is_admin:
             buttons.append([
-                InlineKeyboardButton('🔰 ɢʀᴏᴜᴘ 🔰', url=f'https://t.me/test122425/{temp.U_NAME}?startgroup=true'),
-                InlineKeyboardButton('📢 ᴊᴏɪɴ ᴏᴜʀ ɢʀᴏᴜᴘ 📢', url='https://t.me/test122425')
+                InlineKeyboardButton('🔰 ɢʀᴏᴜᴘ 🔰', url=f'https://t.me/test122425/{temp.U_NAME}?startgroup=true')
             ])
         else:
             # Normal users only see the join group button
             buttons.append([
+                InlineKeyboardButton('🔰 ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ 🔰', url=f'http://telegram.me/{temp.U_NAME}?startgroup=true')
+            ],[
                 InlineKeyboardButton('📢 ᴊᴏɪɴ ᴏᴜʀ ɢʀᴏᴜᴘ 📢', url='https://t.me/test122425')
             ])
         
@@ -1474,12 +1475,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ],
             # NEW: Channel and Ground buttons
             [
-                InlineKeyboardButton('📢 ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ 📢', url=UPDATE_CHNL_LNK),
-                InlineKeyboardButton('👥 ᴊᴏɪɴ ɢʀᴏᴜᴘ 👥', url=GRP_LNK)
+                InlineKeyboardButton('📢 ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ 📢', url='https://t.me/test122425'),
+                InlineKeyboardButton('👥 ᴊᴏɪɴ ɢʀᴏᴜᴘ 👥', url='https://t.me/test122425')
             ],
             [
-                InlineKeyboardButton('RANKING ⭐', callback_data="topsearch"),
-                InlineKeyboardButton('PREMIUM 🎟', callback_data="premium_info"),
+                InlineKeyboardButton('ᴛʀᴇɴᴅɪɴɢ ⭐', callback_data="topsearch"),
+                InlineKeyboardButton('ᴘʀᴇᴍɪᴜᴍ 🎟', callback_data="premium_info"),
             ]
         ])
         
@@ -1554,11 +1555,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ],
             [
                 InlineKeyboardButton('‼️ ᴅɪꜱᴄʟᴀɪᴍᴇʀ ‼️', callback_data='disclaimer'),
-            ],
-            [
-                InlineKeyboardButton('ᴅᴏɴᴀᴛɪᴏɴ 💰', callback_data='donation'),
-            ],
-            [
+                InlineKeyboardButton('ᴅᴏɴᴀᴛɪᴏɴ 💰', callback_data='donation')
+            ],[
                 InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
             ]
         ]
