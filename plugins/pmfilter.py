@@ -1450,43 +1450,48 @@ async def cb_handler(client: Client, query: CallbackQuery):
             pass
     
     elif query.data == "start":
-        buttons = [[
-            InlineKeyboardButton('🔰 ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ 🔰', url=f'http://telegram.me/{temp.U_NAME}?startgroup=true')
-        ],[
-            InlineKeyboardButton('📢 ᴄʜᴀɴɴᴇʟ 📢', url=CHANNEL_LNK),
-            InlineKeyboardButton('👥 ɢʀᴏᴜᴘ 👥', url=GROUP_LNK)
-        ],[
-            InlineKeyboardButton(' ʜᴇʟᴘ 📢', callback_data='help'),
-            InlineKeyboardButton(' ᴀʙᴏᴜᴛ 📖', callback_data='about')
-        ],[
-            InlineKeyboardButton('ᴛᴏᴘ sᴇᴀʀᴄʜɪɴɢ ⭐', callback_data="topsearch"),
-            InlineKeyboardButton('ᴜᴘɢʀᴀᴅᴇ 🎟', callback_data="premium_info"),
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        current_time = datetime.now(pytz.timezone(TIMEZONE))
-        curr_time = current_time.hour
-        if curr_time < 12:
-            gtxt = "ɢᴏᴏᴅ ᴍᴏʀɴɪɴɢ 🌞"
-        elif curr_time < 17:
-            gtxt = "ɢᴏᴏᴅ ᴀғᴛᴇʀɴᴏᴏɴ 🌤"
-        elif curr_time < 21:
-            gtxt = "ɢᴏᴏᴅ ᴇᴠᴇɴɪɴɢ 🌘"
-        else:
-            gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
         try:
-            await client.edit_message_media(
-                query.message.chat.id,
-                query.message.id,
-                InputMediaPhoto(random.choice(PICS))
+            buttons = [[
+                InlineKeyboardButton('🔰 ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ 🔰', url=f'http://telegram.me/{temp.U_NAME}?startgroup=true')
+            ],[
+                InlineKeyboardButton('📢 ᴄʜᴀɴɴᴇʟ 📢', url=CHANNEL_LNK),
+                InlineKeyboardButton('👥 ɢʀᴏᴜᴘ 👥', url=GROUP_LNK)
+            ],[
+                InlineKeyboardButton(' ʜᴇʟᴘ 📢', callback_data='help'),
+                InlineKeyboardButton(' ᴀʙᴏᴜᴛ 📖', callback_data='about')
+            ],[
+                InlineKeyboardButton('ᴛᴏᴘ sᴇᴀʀᴄʜɪɴɢ ⭐', callback_data="topsearch"),
+                InlineKeyboardButton('ᴜᴘɢʀᴀᴅᴇ 🎟', callback_data="premium_info"),
+            ]]
+            reply_markup = InlineKeyboardMarkup(buttons)
+            current_time = datetime.now(pytz.timezone(TIMEZONE))
+            curr_time = current_time.hour
+            if curr_time < 12:
+                gtxt = "ɢᴏᴏᴅ ᴍᴏʀɴɪɴɢ 🌞"
+            elif curr_time < 17:
+                gtxt = "ɢᴏᴏᴅ ᴀғᴛᴇʀɴᴏᴏɴ 🌤"
+            elif curr_time < 21:
+                gtxt = "ɢᴏᴏᴅ ᴇᴠᴇɴɪɴɢ 🌘"
+            else:
+                gtxt = "ɢᴏᴏᴅ ɴɪɢʜᴛ 🌑"
+            try:
+                await client.edit_message_media(
+                    query.message.chat.id,
+                    query.message.id,
+                    InputMediaPhoto(random.choice(PICS))
+                )
+            except Exception as e:
+                # If media cannot be edited (e.g., message has no media), continue
+                pass
+            await query.message.edit_text(
+                text=script.START_TXT.format(query.from_user.mention, gtxt, temp.U_NAME, temp.B_NAME),
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML
             )
+            await query.answer(MSG_ALRT)
         except Exception as e:
-            pass
-        await query.message.edit_text(
-            text=script.START_TXT.format(query.from_user.mention, gtxt, temp.U_NAME, temp.B_NAME),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-        await query.answer(MSG_ALRT)
+            logger.exception(f"Error in start callback: {e}")
+            await query.answer("Something went wrong. Please try again later.", show_alert=True)
 
     elif query.data == "help":
         buttons = [[
