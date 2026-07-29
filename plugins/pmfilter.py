@@ -1537,7 +1537,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('‼️ Disclaimer ‼️', callback_data='disclaimer'),
             InlineKeyboardButton('👨‍💻 Admin Support 👨‍💻', callback_data='admin_support'),  # NEW BUTTON (Source removed)
         ],[
-            InlineKeyboardButton('Donation 💰', callback_data='donation'),
+           # [InlineKeyboardButton('Donation 💰', callback_data='donation')],
         ],[
             InlineKeyboardButton('‹ Back to Home ›', callback_data='start')
         ]]
